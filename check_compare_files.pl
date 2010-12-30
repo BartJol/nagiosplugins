@@ -23,7 +23,7 @@ open(baseline, $baselineFile) or die "An existing baseline file is required";
 #make a dir with a randomized name to save files in
 my $subdir = getId();
 
-my $tmpDir = '/var/www/nagiostempfiles/' . $subdir . '/' ;
+my $tmpDir = '/tmp/' . $subdir . '/' ;
 system ("mkdir $tmpDir");
 
 my $file1 = $tmpDir . "nagiosCompareFile" . "1";
