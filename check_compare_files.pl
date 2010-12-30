@@ -1,10 +1,46 @@
 #!/data/wre/prereqs/bin/perl
 use strict;
 
-#use constant NAGIOS_OK      => 0;
-#use constant NAGIOS_WARN    => 1;
-#use constant NAGIOS_CRIT    => 2;
-#use constant NAGIOS_UNKNOWN => 3;
+=head1 NAME
+
+check_compare_files.pl script
+
+=head1 DESCRIPTION
+
+This script is intended for nagios. It retrieves 2 files with wget, compares them with the diff command line tool. The result
+is compared with a baseline file, again with diff. The result of the last comparison can be found in the
+Performance data field in Nagios.
+The script needs write access in /tmp/
+
+=head2 process
+
+this is run as a script of the command line with 3 rquired arguments and 1 optional argument:
+./check_compare_files.pl file1 file2 baselinefile [impact]
+
+=over 4
+
+=item file1
+
+The location of the first file to compare. Should be valid for wget
+
+=item file2
+
+The location of the second file to compare. Should be valid for wget
+
+=item baselinefile
+
+The location in the filesystem of an file created like:
+diff file1 file2 > baslinefile
+
+=item impact
+
+Default the impact factor is warn. A factor "crit" can be declared here to make the nagios output be Critical.
+
+=back
+
+=cut
+
+
 my %ERRORS=('OK'=>0,'WARNING'=>1,'CRITICAL'=>2,'UNKNOWN'=>3,'DEPENDENT'=>4);
 use DBI;
 
