@@ -57,6 +57,7 @@ elsif ($impact ne "0") {
 #    system ("rm -r $tmpDir");
     exit(NAGIOS_CRIT);
 }
+else {
     exit(NAGIOS_UNKNOWN);
 }
 
