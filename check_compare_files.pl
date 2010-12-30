@@ -13,8 +13,6 @@ my $location2       = @ARGV[1];
 my $baselineFile    = @ARGV[2] || "";
 my $impact          = @ARGV[3] || "warn";
 
-print $impact . "\n";
-
 if (!$location1 || !$location2 || !$baselineFile) {
 	print "Not all locations needed for this check are configured\n";
 	exit $ERRORS{"WARNING"};
@@ -77,8 +75,7 @@ my $_rand;
 
 my $idLength = 22;
 
-my @chars = split(" ",
-    "a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9");
+my @chars = (0..9, "a".."z", "A".."Z");
 
 srand;
 
