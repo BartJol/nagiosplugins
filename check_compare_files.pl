@@ -7,12 +7,14 @@ use constant NAGIOS_CRIT    => 2;
 use constant NAGIOS_UNKNOWN => 3;
 use DBI;
 
-my $location1 = @ARGV[0];
-my $location2 = @ARGV[1];
-my $nagiosTmpDir = 'http://nagios.bartjol.nl/tmp/';
+my $location1       = @ARGV[0];
+my $location2       = @ARGV[1];
+my $baselineFile    = @ARGV[2];
+my $impact          = @ARGV[3] || "0";
+#my $nagiosTmpDir = 'http://nagios.bartjol.nl/tmp/';
 
-if (!$location1 || !$location2) {
-	print "Not all location needed for this check are configured\n";
+if (!$location1 || !$location2 || !$baselineFile) {
+	print "Not all locations needed for this check are configured\n";
 	exit(NAGIOS_WARN);
 }
 
@@ -25,6 +27,7 @@ system ("mkdir $tmpDir");
 my $file1 = $tmpDir . "nagiosCompareFile" . "1";
 my $file2 = $tmpDir . "nagiosCompareFile" . "2";
 my $diffFile = $tmpDir . 'nagiosCompareDiffFile.txt';
+my $diffFile2 = $tmpDir . 'nagiosCompareDiffFile2.txt';
 
 # the variables below are for possible scp use
 #my $user = 'root';
@@ -36,30 +39,25 @@ system ("wget -qNO $file1 $location1");
 system ("wget -qNO $file2 $location2");
 system ("diff $file1 $file2 > $diffFile");
 
-my $diffFileSize = `cat $diffFile | wc -l`;
+my $compareResult = `diff $diffFile $baselineFile`;
+system ( "diff $diffFile $baselineFile > $diffFile2");
 
-# get the thresshold file length (in # of lines)
-my $warnDiffFileSize = @ARGV[2] || 10 ;
-my $critDiffFileSize = 2*$warnDiffFileSize;
-
-
-#compare diff file length to thresshold and give exit statussen accordingly
-if ($diffFileSize <= $warnDiffFileSize ) {
-	print("Differences between files are acceptable\n");
-    system ("rm -r $tmpDir");
-	exit(NAGIOS_OK);
+if (length($compareResult) eq "0") {
+    print("Compared files are below thresshold differences");
+#    system ("rm -r $tmpDir");
+    exit(NAGIOS_OK);
 }
-elsif ($diffFileSize > $critDiffFileSize ) {
-	print "Files " . $location1 . " and " . $location2 . " differ, see <a href=\"" . $nagiosTmpDir .
-    $subdir . "\">here<\/a>\n";
-	exit(NAGIOS_CRIT);
+elsif ($impact eq "0") {
+    print("Compared files differ too much");
+#    system ("rm -r $tmpDir");
+    exit(NAGIOS_WARN)|$compareResult;
 }
-elsif (($diffFileSize > $warnDiffFileSize) && ($diffFileSize <= $critDiffFileSize)) {
-	print "There are some indiscrepancies between the 2 files, see <a href=\"" . $nagiosTmpDir . $subdir . "\">here<\/a>\n";
-	exit(NAGIOS_WARN);
+elsif ($impact ne "0") {
+    print("Compared files differ too much");
+#    system ("rm -r $tmpDir");
+    exit(NAGIOS_CRIT);
 }
-else {
-	exit(NAGIOS_UNKNOWN);
+    exit(NAGIOS_UNKNOWN);
 }
 
 # a sub to make a randomized dir to save files
